@@ -15,6 +15,35 @@ from src.comparison_evaluation import (
 )
 
 
+
+
+
+def show_dataframe(dataframe, **kwargs):
+    """
+    Display a copy of a DataFrame while normalizing columns that mix text
+    and numeric values. This avoids Arrow conversion errors without changing
+    the original data used by EchoMind's analysis and evaluation logic.
+    """
+    display_df = dataframe.copy()
+
+    for column in display_df.columns:
+        values = display_df[column].dropna()
+
+        has_text = values.map(lambda value: isinstance(value, str)).any()
+        has_number = values.map(
+            lambda value: isinstance(value, (int, float))
+            and not isinstance(value, bool)
+        ).any()
+
+        if has_text and has_number:
+            display_df[column] = display_df[column].map(
+                lambda value: "" if pd.isna(value) else str(value)
+            )
+
+    # Keep this as st.dataframe, not show_dataframe, to avoid recursion.
+    st.dataframe(display_df, **kwargs)
+
+
 # ============================================================
 # PAGE CONFIGURATION
 # ============================================================
@@ -194,7 +223,7 @@ else:
         st.line_chart(df.set_index("step")[plot_columns], height=350)
 
     with st.expander("View ecosystem data"):
-        st.dataframe(df, use_container_width=True, hide_index=True)
+        show_dataframe(df, width="stretch", hide_index=True)
 
     st.divider()
 
@@ -221,7 +250,7 @@ else:
         )
     else:
         st.subheader("Detected anomalous observations")
-        st.dataframe(detected, use_container_width=True, hide_index=True)
+        show_dataframe(detected, width="stretch", hide_index=True)
 
     with st.expander("View all anomaly scores"):
         display_columns = [
@@ -229,9 +258,9 @@ else:
             for column in ["step", "anomaly_score", "is_anomaly"]
             if column in anomaly_results.columns
         ]
-        st.dataframe(
+        show_dataframe(
             anomaly_results[display_columns],
-            use_container_width=True,
+            width="stretch",
             hide_index=True,
         )
 
@@ -248,7 +277,7 @@ else:
         "A high hypothesis score means a variable changed in a way that may be "
         "relevant. It is not, by itself, proof of causation."
     )
-    st.dataframe(candidates, use_container_width=True, hide_index=True)
+    show_dataframe(candidates, width="stretch", hide_index=True)
 
     if not candidates.empty:
         top_candidate = candidates.iloc[0]
@@ -307,9 +336,9 @@ else:
                 "Yes" if evaluation["found_in_top_k"] else "No",
             )
             st.subheader("Evaluation ranking")
-            st.dataframe(
+            show_dataframe(
                 evaluation["ranking"],
-                use_container_width=True,
+                width="stretch",
                 hide_index=True,
             )
             st.session_state["echo_evaluation"] = {
@@ -350,7 +379,7 @@ else:
     if interventions is None or interventions.empty:
         st.info("No intervention results are available for this run.")
     else:
-        st.dataframe(interventions, use_container_width=True, hide_index=True)
+        show_dataframe(interventions, width="stretch", hide_index=True)
         best = interventions.iloc[0]
         st.subheader("Best tested intervention")
         col1, col2, col3 = st.columns(3)
@@ -454,9 +483,9 @@ elif st.button("Compare EchoMind vs Baseline", key="compare_baseline"):
 
 if "baseline_comparison" in st.session_state:
     st.subheader("Ranking comparison")
-    st.dataframe(
+    show_dataframe(
         st.session_state["baseline_comparison"],
-        use_container_width=True,
+        width="stretch",
         hide_index=True,
     )
     st.download_button(
@@ -559,7 +588,7 @@ if "comparison_summary" in st.session_state:
     st.subheader("Accuracy comparison")
     st.bar_chart(accuracy_chart.set_index("Method"))
     st.subheader("Results for each seed")
-    st.dataframe(per_seed, use_container_width=True, hide_index=True)
+    show_dataframe(per_seed, width="stretch", hide_index=True)
     st.download_button(
         "Download multi-seed results CSV",
         data=per_seed.to_csv(index=False).encode("utf-8"),
@@ -637,9 +666,9 @@ if "multi_cause_summary" in st.session_state:
     results_df = st.session_state["multi_cause_results"]
 
     st.subheader("Performance by fault cause")
-    st.dataframe(
+    show_dataframe(
         summary_df.round(3),
-        use_container_width=True,
+        width="stretch",
         hide_index=True,
     )
 
@@ -672,7 +701,7 @@ if "multi_cause_summary" in st.session_state:
             st.bar_chart(mrr_chart)
 
     st.subheader("Individual experiment results")
-    st.dataframe(results_df, use_container_width=True, hide_index=True)
+    show_dataframe(results_df, width="stretch", hide_index=True)
 
     st.download_button(
         "Download multi-cause results CSV",
@@ -780,13 +809,13 @@ if report is not None:
         }
     )
 
-    st.dataframe(metric_df, use_container_width=True)
+    show_dataframe(metric_df, width="stretch")
 
     st.subheader("Performance by Fault Cause")
 
-    st.dataframe(
+    show_dataframe(
         report["per_cause"],
-        use_container_width=True,
+        width="stretch",
         hide_index=True,
     )
 
