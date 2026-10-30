@@ -1,0 +1,6 @@
+seed,fault_cause,echomind_rank,baseline_rank,echomind_top_1,baseline_top_1,echomind_top_k,baseline_top_k,echomind_reciprocal_rank,baseline_reciprocal_rank
+100,temperature,2,1,False,True,True,True,0.5,1.0
+106,temperature,5,3,False,False,False,True,0.2,0.3333333333333333
+111,temperature,2,1,False,True,True,True,0.5,1.0
+112,temperature,2,2,False,False,True,True,0.5,0.5
+102,food_supply,2,1,False,True,True,True,0.5,1.0

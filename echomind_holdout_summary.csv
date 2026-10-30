@@ -1,0 +1,5 @@
+fault_cause,experiments,echomind_mean_rank,baseline_mean_rank,echomind_top_1_accuracy,baseline_top_1_accuracy,echomind_top_k_accuracy,baseline_top_k_accuracy,echomind_mrr,baseline_mrr
+food_supply,50,1.02,1.0,0.98,1.0,1.0,1.0,0.99,1.0
+plant_health,50,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0
+temperature,50,1.14,1.08,0.92,0.94,0.98,1.0,0.9540000000000001,0.9666666666666667
+water_level,50,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0
